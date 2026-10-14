@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeVision AI | 현장 안전점검</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">SV</div>
+    <div>
+      <div class="brand-name">SafeVision <span>AI</span></div>
+      <div class="brand-sub">현장 사진 기반 안전점검 시스템</div>
+    </div>
+    <div class="demo-pill">시연용 프로토타입</div>
+  </header>
+
+  <main class="container">
+    <section class="intro">
+      <p class="eyebrow">SMART SAFETY INSPECTION</p>
+      <h1>현장 사진 한 장으로<br><span>안전점검 보고서</span> 만들기</h1>
+      <p class="intro-copy">사진 속 문자를 OCR로 추출하고, 점검 결과와 개선 권고사항을 한눈에 확인하세요.</p>
+    </section>
+
+    <section class="panel upload-panel">
+      <div class="section-heading">
+        <div class="step">01</div>
+        <div><h2>현장 사진 업로드</h2><p>안전표지, 점검표 또는 작업 현장 사진을 선택하세요.</p></div>
+      </div>
+      <label class="dropzone" id="dropzone" for="photoInput">
+        <input type="file" id="photoInput" accept="image/*">
+        <div class="upload-icon">↑</div>
+        <strong>사진을 선택하거나 여기로 끌어오세요</strong>
+        <span>JPG, PNG, WEBP 이미지</span>
+        <span class="choose-btn">파일 선택</span>
+      </label>
+      <div class="preview-wrap hidden" id="previewWrap">
+        <img id="photoPreview" alt="업로드한 현장 사진">
+        <div class="photo-meta"><span class="status-dot"></span><span id="fileName">사진이 선택되었습니다.</span><button class="text-btn" id="removePhoto" type="button">사진 삭제</button></div>
+      </div>
+      <div class="form-grid">
+        <label>점검 구역<input id="areaInput" type="text" placeholder="예: A공장 생산라인"></label>
+        <label>점검자<input id="inspectorInput" type="text" placeholder="예: 안전관리 담당자"></label>
+        <label>점검 일자<input id="dateInput" type="date"></label>
+      </div>
+      <div class="button-row">
+        <button class="primary-btn" id="analyzeBtn" type="button" disabled>사진 OCR 및 점검 분석</button>
+        <span class="hint">OCR은 사진 속 문자를 읽습니다. 시각적 위험 분석은 시연용 예시 결과입니다.</span>
+      </div>
+      <div class="progress-wrap hidden" id="progressWrap"><div class="progress-track"><div id="progressBar"></div></div><p id="progressText">분석 준비 중...</p></div>
+    </section>
+
+    <section class="panel results-panel hidden" id="resultsPanel">
+      <div class="section-heading">
+        <div class="step">02</div>
+        <div><h2>분석 결과</h2><p>OCR 추출 텍스트와 안전점검 참고 항목입니다.</p></div>
+      </div>
+      <div class="notice"><strong>시연 안내</strong><span>위험요소 목록은 실제 이미지 판독 결과가 아닌 예시 데이터입니다. 현장 확인 후 판단하세요.</span></div>
+      <div class="result-grid">
+        <article class="result-card">
+          <div class="card-title-row"><h3>OCR 문자 추출</h3><span class="mini-tag">실행 결과</span></div>
+          <p class="muted">사진에서 인식한 텍스트</p>
+          <textarea id="ocrText" rows="7" placeholder="OCR 결과가 여기에 표시됩니다. 필요하면 직접 수정할 수 있습니다."></textarea>
+          <div class="small-note" id="ocrStatus">사진 업로드 후 분석을 시작하세요.</div>
+        </article>
+        <article class="result-card">
+          <div class="card-title-row"><h3>안전점검 요약</h3><span class="mini-tag demo-tag">시연용 예시</span></div>
+          <div class="risk-summary">
+            <div><span class="risk-number" id="riskCount">3</span><span class="muted">점검 참고 항목</span></div>
+            <div class="risk-level"><span class="risk-dot high"></span>높음 1 <span class="risk-dot medium"></span>중간 1 <span class="risk-dot low"></span>확인 필요 1</div>
+          </div>
+          <div id="riskList" class="risk-list">
+            <div class="risk-item"><span class="risk-badge high-badge">높음</span><div><strong>자재 적재 상태</strong><p>적재물이 불안정해 보이는 경우 낙하 위험 여부를 현장에서 확인하세요.</p></div></div>
+            <div class="risk-item"><span class="risk-badge medium-badge">중간</span><div><strong>통로 정리정돈</strong><p>통로 장애물 유무와 비상 이동 경로 확보 상태를 확인하세요.</p></div></div>
+            <div class="risk-item"><span class="risk-badge check-badge">확인 필요</span><div><strong>보호구 착용 여부</strong><p>사진만으로 판단하기 어려우므로 작업자 보호구 착용 여부를 직접 확인하세요.</p></div></div>
+          </div>
+        </article>
+      </div>
+      <div class="section-heading report-heading">
+        <div class="step">03</div>
+        <div><h2>점검 보고서</h2><p>입력 정보와 분석 결과를 정리해 출력합니다.</p></div>
+      </div>
+      <div class="report-preview" id="reportPreview">
+        <div class="report-top"><div><div class="report-brand">SafeVision AI</div><h2>현장 안전점검 보고서</h2></div><span class="report-label">SAFETY REPORT</span></div>
+        <div class="report-info">
+          <div><span>점검 구역</span><strong id="reportArea">미입력</strong></div>
+          <div><span>점검자</span><strong id="reportInspector">미입력</strong></div>
+          <div><span>점검 일자</span><strong id="reportDate">-</strong></div>
+        </div>
+        <div class="report-photo-row"><img id="reportImage" alt="보고서 현장 사진" class="hidden"><div id="noReportImage">업로드한 현장 사진이 보고서에 포함됩니다.</div></div>
+        <h3>1. OCR 추출 내용</h3>
+        <div class="report-text" id="reportOcr">OCR 분석 후 추출 텍스트가 표시됩니다.</div>
+        <h3>2. 안전점검 참고 항목</h3>
+        <div id="reportRisks"></div>
+        <div class="report-caution">본 보고서는 시연용 참고 자료입니다. 위험도와 조치 필요성은 현장 기준 및 담당자의 확인을 통해 최종 판단해야 합니다.</div>
+      </div>
+      <div class="button-row report-actions">
+        <button class="primary-btn" id="printBtn" type="button">보고서 출력 / PDF 저장</button>
+        <button class="secondary-btn" id="resetBtn" type="button">새 점검 시작</button>
+      </div>
+    </section>
+    <footer>SafeVision AI · 멘토링 시연용 프로토타입</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
